@@ -49,6 +49,10 @@ define(["vendor/backbone",
 			@$gradientPicker = @$el.find(".gradientPicker")
 			@$gradientPreview = @$el.find(".gradientPreview")
 
+			# TODO: this is a temp hack until we get the CSS plugin 
+			# building correctly.
+			@$gradientPicker.css("width", 250)
+
 			bgOpts = @options.bgOpts or {}
 			bgOpts.change = (points, styles) =>
 				@_updateGradientPreview(styles)

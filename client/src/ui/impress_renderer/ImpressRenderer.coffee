@@ -60,7 +60,8 @@ define(["vendor/Handlebars",
 					slide.set("x", cnt * 160 + 30)
 					slide.set("y", ((cnt / colCnt) | 0) * 160 + 80)
 				++cnt)
-			Templates.ImpressTemplate(deckAttrs)
+			result = Templates.ImpressTemplate(deckAttrs)
+			result
 
 		convertTextBoxData: (attrs) ->
 			copy = _.extend({}, attrs)

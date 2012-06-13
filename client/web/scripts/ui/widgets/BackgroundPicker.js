@@ -50,6 +50,7 @@ define(["vendor/backbone", "./Templates", "css!./res/css/BackgroundPicker.css"],
       this.$el.modal();
       this.$gradientPicker = this.$el.find(".gradientPicker");
       this.$gradientPreview = this.$el.find(".gradientPreview");
+      this.$gradientPicker.css("width", 250);
       bgOpts = this.options.bgOpts || {};
       bgOpts.change = function(points, styles) {
         return _this._updateGradientPreview(styles);
