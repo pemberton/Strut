@@ -1,0 +1,58 @@
+.slideEditor {
+	/*height: 100%;*/
+}
+
+.slideEditor .navbar .caret {
+	margin-left: 2px;
+}
+
+.slideEditor div.newSlide {
+	margin-left: 25px;
+}
+
+.slideEditor .btn-warning {
+	font-size: 12px;
+}
+
+.slideEditor .btn .icon-arrow-right {
+	margin-left: 8px;
+	margin-right: -6px;
+}
+
+.slideEditor .mainContent {
+	margin-top: -18px;
+	/*height: 100%;*/
+}
+
+.slideEditor .slidePreviewPanel {
+	width: 150px;
+	height: 100%;
+	float: left;
+	border-right: 1px solid gray;
+	background: #EEE;
+}
+
+.slideEditor .operatingTable {
+	height: 100%;
+	width: 100%;
+	margin-left: 151px;
+	position: absolute;
+	overflow: hidden;
+}
+
+.slideEditor .divider-vertical {
+	height: 51px;
+}
+
+.slideEditor .iconBtns i {
+	display: block;
+	margin: 0 auto;
+}
+
+.slideEditor .pull-right .btn-group {
+	margin-top: 10px;
+}
+
+.slideEditor .normalBtns {
+	margin-top: 10px;
+}

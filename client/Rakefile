@@ -1,0 +1,138 @@
+# This rakefile:
+# -compiles coffee scripts
+# -compiles templates
+# -compiles stylus styles
+# -eventually cleans up web to be a dist only thinger
+
+require 'rake'
+
+myDir = Dir.pwd
+
+
+task :compileTpls, :pretty do |t, args|
+	FileList[myDir + "/src/ui/**/res/templates"].each do |filename|
+		pretty = args[:pretty]
+		puts "Processing: #{filename}"
+		compiledTemplates = '''
+		define(["vendor/Handlebars"], function(Handlebars) {
+			return {
+		'''
+
+		first = true
+		FileList["#{filename}/*.bars"].each do |fname|
+			pipe = IO.popen("handlebars -s #{fname}")
+			result = pipe.readlines
+			pipe.close
+
+			joined = result.join
+			if not pretty
+				joined = joined.gsub(/\\r\\n|\n|\\n/, "");
+			end
+			templateFileName = File.basename(fname, ".bars");
+
+			if first
+				compiledTemplates += "\n\"#{templateFileName}\": Handlebars.template(#{joined})"
+				first = false
+			else
+				compiledTemplates += ",\n\"#{templateFileName}\": Handlebars.template(#{joined})"
+			end
+  		end
+
+  		destination = filename.sub("/src/ui/", "/web/scripts/ui/").sub("/res/templates", "")
+  		puts "#{destination}/Templates.js"
+  		File.open("#{destination}/Templates.js", 'w') {|f|
+  			f.write(compiledTemplates)
+  			f.write("\n}});");
+  		}
+	end
+end
+
+task :compileStylus do
+end
+
+task :compileDocs do
+	FileList["./**/*.js"].each do |filename|
+		puts filename
+		pipe = IO.popen("docco #{filename}")
+		result = pipe.readlines
+		pipe.close
+
+		puts result
+	end
+end
+
+task :compileCoffee, :watch do |t,args|
+	watch = ""
+	if args[:watch]
+		watch = "--watch"
+	end
+
+	system %{coffee #{watch} -b --compile --output web/scripts/ src/}
+end
+
+task :refactor, :source, :destination do |t, args|
+	source = args[:source]
+	destination = args[:destination]
+
+	if !destination
+		puts "usage: rake refactor[source,destination]"
+		exit
+	end
+
+	FileList["./**/*.js"].each do |fname|
+		#puts fname
+		pipe = IO.popen("amdRefactor #{source} < #{fname}")
+		result = pipe.readlines
+		pipe.close
+
+		if result.length > 0
+			# line col_start col_end
+			importLoc = result[0].split(",")
+			line = Integer(importLoc[0]) - 1
+			colStart = Integer(importLoc[1]) - 1
+			colEnd = Integer(importLoc[2])
+
+			lines = File.readlines(fname);
+			theLine = lines[line]
+			theLine = 
+				"#{theLine[0..colStart]}#{destination}#{theLine[colEnd..theLine.length]}"
+
+			lines[line] = theLine
+
+			puts "Refactoring: #{fname}"
+			File.open(fname, 'w') { |f| f << lines }
+			#puts lines
+		end
+	end
+end
+
+task :showDeps, :package do |t, args|
+	myPkg = args[:package]
+
+	if !myPkg
+		puts "usage: rake showDeps[package]"
+		exit
+	end
+
+	FileList["web/scripts/#{myPkg}/**/*.js"].each do |fname|
+		pipe = IO.popen("amdDeps #{myPkg} < #{fname}")
+		result = pipe.readlines
+		pipe.close
+
+		if result.length > 0
+			puts result
+		end
+	end
+end
+
+# TODO: need to specify dependencies
+# and also need to not run if no changes
+task :dist do
+	system %{rsync -r --exclude='.git' web/ dist/}
+	myDir = Dir.pwd
+	FileList["web/**/*.js"].each do |filename|
+		destFilename = filename[3..filename.length]
+		system %{java -jar /Users/mattcrinklaw/opt/closure-compiler/compiler.jar --js=#{myDir}/#{filename} --js_output_file=#{myDir}/dist/#{destFilename}}
+		puts "#{myDir}/dist/#{destFilename}"
+	end
+end
